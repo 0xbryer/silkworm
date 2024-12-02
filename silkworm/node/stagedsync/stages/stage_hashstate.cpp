@@ -98,20 +98,16 @@ Stage::Result HashState::forward(RWTxn& txn) {
         txn.commit_and_renew();
 
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kDbError;
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "unexpected and undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "unexpected and undefined"});
         ret = Stage::Result::kUnexpectedError;
     }
 
@@ -154,20 +150,16 @@ Stage::Result HashState::unwind(RWTxn& txn) {
         txn.commit_and_renew();
 
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kDbError;
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "unexpected and undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "unexpected and undefined"});
         ret = Stage::Result::kUnexpectedError;
     }
 
@@ -233,7 +225,6 @@ Stage::Result HashState::hash_from_plainstate(RWTxn& txn) {
 
                 Entry entry{Bytes(address_hash.bytes, kHashLength), Bytes{from_slice(data.value)}};
                 collector_->collect(std::move(entry));
-
             } else if (data.key.length() == kPlainStoragePrefixLength) {
                 // Hash storage
                 // data.key           == Address + Incarnation
@@ -325,20 +316,16 @@ Stage::Result HashState::hash_from_plainstate(RWTxn& txn) {
         }
 
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kDbError;
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "undefined"});
         ret = Stage::Result::kUnexpectedError;
     }
 
@@ -402,20 +389,16 @@ Stage::Result HashState::hash_from_plaincode(RWTxn& txn) {
         }
 
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kDbError;
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "undefined"});
         ret = Stage::Result::kUnexpectedError;
     }
 
@@ -445,10 +428,9 @@ Stage::Result HashState::hash_from_account_changeset(RWTxn& txn, BlockNum previo
         auto source_initial_key{block_key(expected_blocknum)};
         auto source_changeset = txn.ro_cursor_dup_sort(table::kAccountChangeSet);
         auto source_plainstate = txn.ro_cursor_dup_sort(table::kPlainState);
-        auto changeset_data{
-            source_changeset->find(to_slice(source_initial_key),  // Initial record MUST be found because
-                                   /*throw_notfound=*/true)};     // there is at least 1 change per block
-                                                                  // (the miner reward)
+
+        // Initial record MUST be found because there is at least 1 change per block: the miner reward
+        auto changeset_data = source_changeset->find(to_slice(source_initial_key), /*throw_notfound=*/true);
         while (changeset_data.done) {
             reached_blocknum = endian::load_big_u64(from_slice(changeset_data.key).data());
             check_block_sequence(reached_blocknum, expected_blocknum);
@@ -468,7 +450,7 @@ Stage::Result HashState::hash_from_account_changeset(RWTxn& txn, BlockNum previo
                 evmc::address address{bytes_to_address(changeset_value_view)};
                 if (!changed_addresses.contains(address)) {
                     auto address_hash{to_bytes32(keccak256(address.bytes).bytes)};
-                    auto plainstate_data{source_plainstate->find(db::to_slice(address), /*throw_notfound=*/false)};
+                    auto plainstate_data = source_plainstate->find(db::to_slice(address), /*throw_notfound=*/false);
                     if (plainstate_data.done) {
                         Bytes current_value{from_slice(plainstate_data.value)};
                         changed_addresses[address] = std::make_pair(address_hash, current_value);
@@ -485,20 +467,16 @@ Stage::Result HashState::hash_from_account_changeset(RWTxn& txn, BlockNum previo
         ret = write_changes_from_changed_addresses(txn, changed_addresses);
 
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kDbError;
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "undefined"});
         ret = Stage::Result::kUnexpectedError;
     }
 
@@ -585,20 +563,16 @@ Stage::Result HashState::hash_from_storage_changeset(RWTxn& txn, BlockNum previo
         ret = write_changes_from_changed_storage(txn, storage_changes, hashed_addresses);
 
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kDbError;
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "undefined"});
         ret = Stage::Result::kUnexpectedError;
     }
 
@@ -634,7 +608,7 @@ Stage::Result HashState::unwind_from_account_changeset(RWTxn& txn, BlockNum prev
 
         auto changeset_cursor = txn.ro_cursor_dup_sort(table::kAccountChangeSet);
         auto initial_key{block_key(expected_blocknum)};
-        auto changeset_data{changeset_cursor->find(to_slice(initial_key), /*throw_notfound=*/true)};
+        auto changeset_data = changeset_cursor->find(to_slice(initial_key), /*throw_notfound=*/true);
 
         while (changeset_data.done) {
             reached_blocknum = endian::load_big_u64(from_slice(changeset_data.key).data());
@@ -673,20 +647,16 @@ Stage::Result HashState::unwind_from_account_changeset(RWTxn& txn, BlockNum prev
         ret = write_changes_from_changed_addresses(txn, changed_addresses);
 
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         return Stage::Result::kDbError;
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         return Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "undefined"});
         return Stage::Result::kUnexpectedError;
     }
 
@@ -723,11 +693,13 @@ Stage::Result HashState::unwind_from_storage_changeset(RWTxn& txn, BlockNum prev
 
         auto changeset_cursor = txn.ro_cursor_dup_sort(table::kStorageChangeSet);
         auto initial_key_prefix{block_key(to + 1)};
-        auto changeset_data{changeset_cursor->lower_bound(to_slice(initial_key_prefix), /*throw_notfound=*/false)};
+        auto changeset_data = changeset_cursor->lower_bound(to_slice(initial_key_prefix), /*throw_notfound=*/false);
 
         if (!changeset_data.done) {
-            log::Warning(log_prefix_,
-                         {"function", std::string(__FUNCTION__), "warning", "no storage changeset found", "description", "this should only happen during integration tests"});
+            SILK_TRACE_M(log_prefix_,
+                         {"function", std::string(__FUNCTION__),
+                          "warning", "no storage changeset found",
+                          "description", "this should only happen during integration tests"});
             return ret;
         }
 
@@ -778,20 +750,16 @@ Stage::Result HashState::unwind_from_storage_changeset(RWTxn& txn, BlockNum prev
         ret = write_changes_from_changed_storage(txn, storage_changes, hashed_addresses);
 
     } catch (const mdbx::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kDbError;
     } catch (const StageError& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = static_cast<Stage::Result>(ex.err());
     } catch (const std::exception& ex) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", std::string(ex.what())});
         ret = Stage::Result::kUnexpectedError;
     } catch (...) {
-        log::Error(log_prefix_,
-                   {"function", std::string(__FUNCTION__), "exception", "undefined"});
+        SILK_ERROR_M(log_prefix_, {"function", std::string(__FUNCTION__), "exception", "undefined"});
         ret = Stage::Result::kUnexpectedError;
     }
 
@@ -831,15 +799,26 @@ Stage::Result HashState::write_changes_from_changed_addresses(RWTxn& txn, const 
             target_hashed_accounts->upsert(db::to_slice(address_hash), to_slice(current_encoded_value));
 
             // Lookup value in PlainCodeHash for Contract
-            const auto incarnation{Account::incarnation_from_encoded_storage(current_encoded_value)};
-            success_or_throw(incarnation);
-            if (incarnation != 0) {
+            auto account = Account::from_encoded_storage(current_encoded_value);
+            success_or_throw(account);
+            if (account->incarnation != 0) {
+                if (account->code_hash == kEmptyHash) {
+                    SILK_TRACE_M(log_prefix_, {"function", std::string(__FUNCTION__),
+                                               "address", address_to_hex(address),
+                                               "address_hash", to_hex(address_hash),
+                                               "incarnation", std::to_string(account->incarnation)});
+                    Bytes code_hash_key(kAddressLength + kIncarnationLength, '\0');
+                    std::memcpy(&code_hash_key[0], address.bytes, kAddressLength);
+                    endian::store_big_u64(&code_hash_key[kAddressLength], account->incarnation);
+                    const auto new_code_hash = source_plaincode->find(to_slice(code_hash_key));
+                    std::memcpy(account->code_hash.bytes, new_code_hash.value.data(), kHashLength);
+                    target_hashed_accounts->upsert(to_slice(address_hash), to_slice(account->encode_for_storage()));
+                }
                 std::memcpy(&plain_code_key[0], address.bytes, kAddressLength);
                 std::memcpy(&hashed_code_key[0], address_hash.bytes, kHashLength);
-                endian::store_big_u64(&hashed_code_key[kHashLength], *incarnation);
-                endian::store_big_u64(&plain_code_key[kAddressLength], *incarnation);
-                auto code_data{source_plaincode->find(to_slice(plain_code_key),
-                                                      /*throw_notfound=*/false)};
+                endian::store_big_u64(&hashed_code_key[kHashLength], account->incarnation);
+                endian::store_big_u64(&plain_code_key[kAddressLength], account->incarnation);
+                auto code_data = source_plaincode->find(to_slice(plain_code_key), /*throw_notfound=*/false);
                 if (code_data.done && !code_data.value.empty()) {
                     target_hashed_code->upsert(to_slice(hashed_code_key), code_data.value);
                 } else {
