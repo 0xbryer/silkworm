@@ -430,9 +430,7 @@ Stage::Result HashState::hash_from_account_changeset(RWTxn& txn, BlockNum previo
         auto source_plainstate = txn.ro_cursor_dup_sort(table::kPlainState);
 
         // Initial record MUST be found because there is at least 1 change per block: the miner reward
-        SILK_INFO << "expected_blocknum=" << expected_blocknum << " source_initial_key=" << to_hex(source_initial_key);
         auto changeset_data = source_changeset->find(to_slice(source_initial_key), /*throw_notfound=*/true);
-        SILK_INFO << "changeset_data.done=" << changeset_data.done << " changeset_data.key=" << to_hex(from_slice(changeset_data.key));
         while (changeset_data.done) {
             reached_blocknum = endian::load_big_u64(from_slice(changeset_data.key).data());
             check_block_sequence(reached_blocknum, expected_blocknum);
@@ -804,7 +802,7 @@ Stage::Result HashState::write_changes_from_changed_addresses(RWTxn& txn, const 
             auto account = Account::from_encoded_storage(current_encoded_value);
             success_or_throw(account);
             if (account->incarnation != 0) {
-                if (account->code_hash == kEmptyHash) {
+                /*if (account->code_hash == kEmptyHash) {
                     SILK_INFO_M(log_prefix_, {"function", std::string(__FUNCTION__),
                                               "address", address_to_hex(address),
                                               "address_hash", to_hex(address_hash),
@@ -812,19 +810,27 @@ Stage::Result HashState::write_changes_from_changed_addresses(RWTxn& txn, const 
                     Bytes code_hash_key(kAddressLength + kIncarnationLength, '\0');
                     std::memcpy(&code_hash_key[0], address.bytes, kAddressLength);
                     endian::store_big_u64(&code_hash_key[kAddressLength], account->incarnation);
-                    const auto new_code_hash = source_plaincode->find(to_slice(code_hash_key), /*throw_notfound=*/false);
+                    const auto new_code_hash = source_plaincode->find(to_slice(code_hash_key)false);
                     if (!new_code_hash.done) {
                         return Stage::Result::kDbError;
                     }
                     std::memcpy(account->code_hash.bytes, new_code_hash.value.data(), kHashLength);
                     target_hashed_accounts->upsert(to_slice(address_hash), to_slice(account->encode_for_storage()));
-                }
+                }*/
                 std::memcpy(&plain_code_key[0], address.bytes, kAddressLength);
                 std::memcpy(&hashed_code_key[0], address_hash.bytes, kHashLength);
                 endian::store_big_u64(&hashed_code_key[kHashLength], account->incarnation);
                 endian::store_big_u64(&plain_code_key[kAddressLength], account->incarnation);
-                auto code_data = source_plaincode->find(to_slice(plain_code_key), /*throw_notfound=*/false);
+                const auto code_data = source_plaincode->find(to_slice(plain_code_key), /*throw_notfound=*/false);
                 if (code_data.done && !code_data.value.empty()) {
+                    if (account->code_hash == kEmptyHash) {
+                        SILK_INFO_M(log_prefix_, {"function", std::string(__FUNCTION__),
+                                                  "address", address_to_hex(address),
+                                                  "address_hash", to_hex(address_hash),
+                                                  "incarnation", std::to_string(account->incarnation)});
+                        std::memcpy(account->code_hash.bytes, code_data.value.data(), kHashLength);
+                        target_hashed_accounts->upsert(to_slice(address_hash), to_slice(account->encode_for_storage()));
+                    }
                     target_hashed_code->upsert(to_slice(hashed_code_key), code_data.value);
                 } else {
                     target_hashed_code->erase(to_slice(hashed_code_key));
