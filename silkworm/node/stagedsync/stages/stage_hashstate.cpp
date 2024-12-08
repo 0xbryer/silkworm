@@ -430,7 +430,9 @@ Stage::Result HashState::hash_from_account_changeset(RWTxn& txn, BlockNum previo
         auto source_plainstate = txn.ro_cursor_dup_sort(table::kPlainState);
 
         // Initial record MUST be found because there is at least 1 change per block: the miner reward
+        SILK_INFO << "expected_blocknum=" << expected_blocknum << " source_initial_key=" << to_hex(source_initial_key);
         auto changeset_data = source_changeset->find(to_slice(source_initial_key), /*throw_notfound=*/true);
+        SILK_INFO << "changeset_data.done=" << changeset_data.done << " changeset_data.key=" << to_hex(from_slice(changeset_data.key));
         while (changeset_data.done) {
             reached_blocknum = endian::load_big_u64(from_slice(changeset_data.key).data());
             check_block_sequence(reached_blocknum, expected_blocknum);
