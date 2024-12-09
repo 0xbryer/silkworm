@@ -53,7 +53,7 @@ Task<void> TriggersStage::schedule(std::function<void(db::RWTxn&)> callback) {
         co_return;
     };
     SILK_INFO_M("TriggersStage", {"op", "schedule", "current_tx_", std::to_string(intptr_t(current_tx_))}) << "BEFORE spawn";
-    return concurrency::spawn_task(ioc_, task_caller());
+    co_return co_await concurrency::spawn_task(ioc_, task_caller());
 }
 
 bool TriggersStage::stop() {
