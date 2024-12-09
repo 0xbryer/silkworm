@@ -802,21 +802,6 @@ Stage::Result HashState::write_changes_from_changed_addresses(RWTxn& txn, const 
             auto account = Account::from_encoded_storage(current_encoded_value);
             success_or_throw(account);
             if (account->incarnation != 0) {
-                /*if (account->code_hash == kEmptyHash) {
-                    SILK_INFO_M(log_prefix_, {"function", std::string(__FUNCTION__),
-                                              "address", address_to_hex(address),
-                                              "address_hash", to_hex(address_hash),
-                                              "incarnation", std::to_string(account->incarnation)});
-                    Bytes code_hash_key(kAddressLength + kIncarnationLength, '\0');
-                    std::memcpy(&code_hash_key[0], address.bytes, kAddressLength);
-                    endian::store_big_u64(&code_hash_key[kAddressLength], account->incarnation);
-                    const auto new_code_hash = source_plaincode->find(to_slice(code_hash_key)false);
-                    if (!new_code_hash.done) {
-                        return Stage::Result::kDbError;
-                    }
-                    std::memcpy(account->code_hash.bytes, new_code_hash.value.data(), kHashLength);
-                    target_hashed_accounts->upsert(to_slice(address_hash), to_slice(account->encode_for_storage()));
-                }*/
                 std::memcpy(&plain_code_key[0], address.bytes, kAddressLength);
                 std::memcpy(&hashed_code_key[0], address_hash.bytes, kHashLength);
                 endian::store_big_u64(&hashed_code_key[kHashLength], account->incarnation);
@@ -829,7 +814,7 @@ Stage::Result HashState::write_changes_from_changed_addresses(RWTxn& txn, const 
                                                   "address_hash", to_hex(address_hash),
                                                   "incarnation", std::to_string(account->incarnation)});
                         std::memcpy(account->code_hash.bytes, code_data.value.data(), kHashLength);
-                        target_hashed_accounts->upsert(to_slice(address_hash), to_slice(account->encode_for_storage()));
+                        target_hashed_accounts->upsert(db::to_slice(address_hash), to_slice(account->encode_for_storage()));
                     }
                     target_hashed_code->upsert(to_slice(hashed_code_key), code_data.value);
                 } else {
